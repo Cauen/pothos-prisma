@@ -1,5 +1,6 @@
 import { builder } from './builder';
 import { db } from './db';
+import { } from '../src/models/Girafee'
 
 builder.prismaObject('User', {
   findUnique: ({ id }) => ({ id: Number.parseInt(String(id), 10) }),
@@ -14,7 +15,16 @@ builder.prismaObject('User', {
       },
     }),
     posts: t.relation('posts'),
-    comments: t.relation('Comments', {}),
+    comments: t.relation('Comments', {
+      args: {
+        oldestFirst: t.arg.boolean(),
+      },
+      query: (args, context) => ({
+        orderBy: {
+          id: args.oldestFirst ? 'asc' : 'desc',
+        },
+      }),
+    }),
   }),
 });
 
@@ -49,47 +59,87 @@ builder.prismaObject('Comment', {
 
 const DEFAULT_PAGE_SIZE = 10;
 
-builder.queryType({
-  fields: (t) => ({
-    post: t.prismaField({
-      type: 'Post',
-      nullable: true,
-      args: {
-        id: t.arg.id({ required: true }),
-      },
-      resolve: (query, root, args) =>
-        db.post.findUnique({
-          ...query,
-          where: { id: Number.parseInt(String(args.id), 10) },
-        }),
-    }),
-    posts: t.prismaField({
-      type: ['Post'],
-      args: {
-        take: t.arg.int(),
-        skip: t.arg.int(),
-      },
-      resolve: (query, root, args) =>
-        db.post.findMany({
-          ...query,
-          take: args.take ?? DEFAULT_PAGE_SIZE,
-          skip: args.skip ?? 0,
-        }),
-    }),
-    user: t.prismaField({
-      type: 'User',
-      nullable: true,
-      args: {
-        id: t.arg({ type: "ID" })
-      },
-      resolve: (query, root, args) =>
-        db.user.findUnique({
-          ...query,
-          where: { id: Number.parseInt(String(args.id), 10) },
-        }),
-    }),
+
+builder.queryFields((t) => ({
+  post: t.prismaField({
+    type: 'Post',
+    nullable: true,
+    args: {
+      id: t.arg.id({ required: true }),
+    },
+    resolve: (query, root, args) =>
+      db.post.findUnique({
+        ...query,
+        where: { id: Number.parseInt(String(args.id), 10) },
+      }),
   }),
-});
+  posts: t.prismaField({
+    type: ['Post'],
+    args: {
+      take: t.arg.int(),
+      skip: t.arg.int(),
+    },
+    resolve: (query, root, args) =>
+      db.post.findMany({
+        ...query,
+        take: args.take ?? DEFAULT_PAGE_SIZE,
+        skip: args.skip ?? 0,
+      }),
+  }),
+  user: t.prismaField({
+    type: 'User',
+    nullable: true,
+    args: {
+      id: t.arg({ type: "ID" })
+    },
+    resolve: (query, root, args) =>
+      db.user.findUnique({
+        ...query,
+        where: { id: Number.parseInt(String(args.id), 10) },
+      }),
+  }),
+}))
+// builder.queryType({
+//   fields: (t) => ({
+//     post: t.prismaField({
+//       type: 'Post',
+//       nullable: true,
+//       args: {
+//         id: t.arg.id({ required: true }),
+//       },
+//       resolve: (query, root, args) =>
+//         db.post.findUnique({
+//           ...query,
+//           where: { id: Number.parseInt(String(args.id), 10) },
+//         }),
+//     }),
+//     posts: t.prismaField({
+//       type: ['Post'],
+//       args: {
+//         take: t.arg.int(),
+//         skip: t.arg.int(),
+//       },
+//       resolve: (query, root, args) =>
+//         db.post.findMany({
+//           ...query,
+//           take: args.take ?? DEFAULT_PAGE_SIZE,
+//           skip: args.skip ?? 0,
+//         }),
+//     }),
+//     user: t.prismaField({
+//       type: 'User',
+//       nullable: true,
+//       args: {
+//         id: t.arg({ type: "ID" })
+//       },
+//       resolve: (query, root, args) =>
+//         db.user.findUnique({
+//           ...query,
+//           where: { id: Number.parseInt(String(args.id), 10) },
+//         }),
+//     }),
+//   }),
+// });
 
 builder.mutationType({
   fields: (t) => ({

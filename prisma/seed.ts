@@ -3,7 +3,9 @@
 import faker from '@faker-js/faker';
 import { PrismaClient } from './client';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  log: ['error', 'info', 'query', 'warn'],
+});
 
 faker.seed(123);
 

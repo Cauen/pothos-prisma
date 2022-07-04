@@ -1,10 +1,11 @@
 import { createServer } from '@graphql-yoga/node';
 import { schema } from './schema';
+import { ApolloServer } from 'apollo-server'
 
-const server = createServer({
+const server = new ApolloServer({
   schema,
 });
 
-server.start().catch((error) => {
-  console.error(error);
-});
+server.listen(3000).then(({ url }) => {
+  console.log(`🚀 Server ready at ${url}`)
+})
