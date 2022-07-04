@@ -2,8 +2,36 @@ import { builder } from './builder';
 import { db } from './db';
 import { } from '../src/models/Girafee'
 
+const GiraffeInput = builder.inputType('GiraffeInput', {
+  fields: (t) => ({
+    name: t.string({ required: true }),
+    birthdate: t.string({ required: true }),
+    height: t.float({ required: true }),
+  }),
+});
+
+interface RecursiveGiraffeInputShape {
+  name?: string;
+  birthdate?: string;
+  height?: number;
+  friends?: RecursiveGiraffeInputShape;
+}
+
+const RecursiveGiraffeInput = builder
+  .inputRef<RecursiveGiraffeInputShape>('RecursiveGiraffeInput')
+  .implement({
+    fields: (t) => ({
+      name: t.string({ required: false }),
+      birthdate: t.string({ required: false }),
+      height: t.float({ required: false }),
+      friends: t.field({
+        type: RecursiveGiraffeInput,
+      }),
+    }),
+  });
+
 builder.prismaObject('User', {
-  findUnique: ({ id }) => ({ id: Number.parseInt(String(id), 10) }),
+  findUnique: ({ id }) => ({ id: Number.parseInt(String(id || 1), 10) }),
   fields: (t) => ({
     id: t.exposeID('id'),
     firstName: t.exposeString('firstName'),
@@ -18,12 +46,20 @@ builder.prismaObject('User', {
     comments: t.relation('Comments', {
       args: {
         oldestFirst: t.arg.boolean(),
+        girafee: t.arg({ type: GiraffeInput }),
+        girafeeAndChilds: t.arg({ type: RecursiveGiraffeInput, required: true }),
       },
-      query: (args, context) => ({
-        orderBy: {
-          id: args.oldestFirst ? 'asc' : 'desc',
-        },
-      }),
+      query: (args, context) => {
+        console.log(args.girafee?.birthdate)
+        console.log(args.girafeeAndChilds.friends?.friends?.friends?.friends?.friends)
+        console.log({ args })
+
+        return {
+          orderBy: {
+            id: args.oldestFirst ? 'asc' : 'desc',
+          },
+        }
+      },
     }),
   }),
 });
@@ -93,10 +129,7 @@ builder.queryFields((t) => ({
       id: t.arg({ type: "ID" })
     },
     resolve: (query, root, args) =>
-      db.user.findUnique({
-        ...query,
-        where: { id: Number.parseInt(String(args.id), 10) },
-      }),
+      null
   }),
 }))
 // builder.queryType({
