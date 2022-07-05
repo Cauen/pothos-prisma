@@ -66,7 +66,7 @@ builder.prismaObject('User', {
 
 builder.prismaObject('Post', {
   findUnique: ({ id }) => ({ id: Number.parseInt(String(id), 10) }),
-
+  
   fields: (t) => ({
     id: t.exposeID('id'),
     title: t.exposeString('title'),
@@ -80,23 +80,46 @@ builder.prismaObject('Post', {
   }),
 });
 
-builder.prismaNode
 
-builder.prismaObject('Comment', {
-  findUnique: ({ id }) => ({ id: Number.parseInt(String(id), 10) }),
-
-  fields: (t) => ({
-    id: t.exposeInt('id'),
-    comment: t.exposeString('comment'),
-    author: t.relation('author'),
-    post: t.relation('post'),
-  }),
+const commentObject = builder.prismaObject('Comment', {
+  findUnique: (parent) => ({ id: parent.id }),
+  include: {
+    post: true,
+  },
+  fields: (t) => {
+    const fields = {
+      id: t.exposeInt('id'),
+      comment: t.exposeString('comment'),
+      comentt: t.field({
+        type: "String", resolve: (parent) => {
+          console.log({ parent })
+          return `${parent.comment}-${parent.post.title}`
+        }
+      }),
+      author: t.relation('author'),
+      post: t.relation('post'),
+    }
+    const { comentt, ...publicFields } = fields
+    console.log(`This ${comentt} is never sent to user`)
+    console.log({ comentt })
+    return { ...publicFields, authors: t.relation('author'), }
+  },
 });
 
 const DEFAULT_PAGE_SIZE = 10;
 
-
 builder.queryFields((t) => ({
+  comment: t.prismaField({
+    type: 'Comment',
+    nullable: true,
+    resolve: (query, root, args) => {
+      console.log({ args, query })
+      return db.comment.findUnique({
+        where: { id: 1 },
+        ...query,
+      })
+    }
+  }),
   post: t.prismaField({
     type: 'Post',
     nullable: true,

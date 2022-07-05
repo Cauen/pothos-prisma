@@ -9,3 +9,4 @@ export const builder = new SchemaBuilder<{ PrismaTypes: PrismaTypes }>({
     client: db,
   },
 });
+
