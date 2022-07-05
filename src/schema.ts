@@ -80,6 +80,11 @@ builder.prismaObject('Post', {
   }),
 });
 
+const a = builder.prismaWheree('User', {
+  fields: ({
+    id: true,
+  }),
+})
 
 const commentObject = builder.prismaObject('Comment', {
   findUnique: (parent) => ({ id: parent.id }),
