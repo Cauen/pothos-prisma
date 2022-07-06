@@ -3,6 +3,7 @@ import { mkdir, writeFile } from 'fs';
 import { dirname } from 'path';
 import ts, { ListFormat, ScriptKind, ScriptTarget, SyntaxKind } from 'typescript';
 import { generatorHandler } from '@prisma/generator-helper';
+import generateInputs from './inputsGenerator';
 
 const ScalarTypes = [
   'String',
@@ -29,6 +30,8 @@ generatorHandler({
       options.otherGenerators.find((gen) => gen.provider.value === 'prisma-client-js')!.output!
         .value;
 
+    const generatedFields = await generateInputs(options.dmmf)
+    return
     const importStatement = ts.factory.createImportDeclaration(
       [],
       [],
@@ -103,10 +106,10 @@ generatorHandler({
             undefined,
             relations.length > 0
               ? ts.factory.createUnionTypeNode(
-                  relations.map((field) =>
-                    ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(field.name)),
-                  ),
-                )
+                relations.map((field) =>
+                  ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(field.name)),
+                ),
+              )
               : ts.factory.createTypeReferenceNode('never'),
           ),
           ts.factory.createPropertySignature(
@@ -115,10 +118,10 @@ generatorHandler({
             undefined,
             relations.length > 0
               ? ts.factory.createUnionTypeNode(
-                  relations.map((field) =>
-                    ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(field.name)),
-                  ),
-                )
+                relations.map((field) =>
+                  ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(field.name)),
+                ),
+              )
               : ts.factory.createTypeReferenceNode('never'),
           ),
           ts.factory.createPropertySignature(
@@ -127,10 +130,10 @@ generatorHandler({
             undefined,
             listRelations.length > 0
               ? ts.factory.createUnionTypeNode(
-                  listRelations.map((field) =>
-                    ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(field.name)),
-                  ),
-                )
+                listRelations.map((field) =>
+                  ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(field.name)),
+                ),
+              )
               : ts.factory.createTypeReferenceNode('never'),
           ),
           ts.factory.createPropertySignature(
@@ -152,11 +155,11 @@ generatorHandler({
                       undefined,
                       field.isList
                         ? ts.factory.createArrayTypeNode(
-                            ts.factory.createTypeReferenceNode(typeName),
-                          )
+                          ts.factory.createTypeReferenceNode(typeName),
+                        )
                         : field.isRequired
-                        ? ts.factory.createTypeReferenceNode(typeName)
-                        : ts.factory.createUnionTypeNode([
+                          ? ts.factory.createTypeReferenceNode(typeName)
+                          : ts.factory.createUnionTypeNode([
                             ts.factory.createTypeReferenceNode(typeName),
                             ts.factory.createLiteralTypeNode(ts.factory.createNull()),
                           ]),

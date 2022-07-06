@@ -9,24 +9,36 @@ generator client {
   output   = "./client"
 }
 
-generator pothos {
-  provider     = "prisma-pothos-types"
-  // Match client output location from above
+// generator pothos {
+//   provider     = "prisma-pothos-types"
+//   // Match client output location from above
+//   clientOutput = "./client"
+//   output       = "./generated.d.ts"
+// }
+
+generator pothosCrud {
+  provider     = "ts-node --transpile-only src/pothos-plugin/src/generator.ts"
   clientOutput = "./client"
-  output       = "./generated.d.ts"
+  output       = "../tests/generated-crud.ts"
 }
 
 model User {
   id        Int       @id @default(autoincrement())
   firstName String
+  /// lastname description
   lastName  String
+  /// relation desc
   posts     Post[]
   Comments  Comment[]
+  /// createdAt description
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt DateTime? @updatedAt
 }
 
 model Post {
   id       Int       @id @default(autoincrement())
   title    String
+  /// createdAt description
   content  String
   author   User      @relation(fields: [authorId], references: [id])
   Comments Comment[]

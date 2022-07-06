@@ -1,6 +1,8 @@
 import { builder } from './builder';
 import { db } from './db';
 import { } from '../src/models/Girafee'
+import './models/User'
+import './inputs'
 
 const GiraffeInput = builder.inputType('GiraffeInput', {
   fields: (t) => ({
@@ -30,7 +32,7 @@ const RecursiveGiraffeInput = builder
     }),
   });
 
-builder.prismaObject('User', {
+export const User = builder.prismaObject('User', {
   findUnique: ({ id }) => ({ id: Number.parseInt(String(id || 1), 10) }),
   fields: (t) => ({
     id: t.exposeID('id'),

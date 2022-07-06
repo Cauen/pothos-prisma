@@ -6,8 +6,10 @@
   "types": "src/index.ts",
   "scripts": {
     "generate": "prisma generate",
+    "migrate": "prisma migrate dev",
     "seed": "prisma migrate reset -f",
     "start": "node -r @swc-node/register src/server.ts",
+    "generator": "node -r @swc-node/register src/pothos-plugin/src/inputsGenerator/index.ts",
     "type": "tsc --noEmit"
   },
   "prisma": {
@@ -22,7 +24,8 @@
     "@swc-node/register": "^1.4.2",
     "apollo-server": "^3.9.0",
     "graphql": "16.3.0",
-    "prisma": "^3.12.0"
+    "prisma": "^3.12.0",
+    "ts-node": "^10.8.2"
   },
   "publishConfig": {
     "access": "public"
